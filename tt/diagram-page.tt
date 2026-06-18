@@ -98,6 +98,7 @@
           </div>
           <div class="aside-2">
             <div id="attr-desc"></div>
+            <div id="obj-desc"></div>
             <script>
               Reticulo.config = Config;
               Reticulo.main();
