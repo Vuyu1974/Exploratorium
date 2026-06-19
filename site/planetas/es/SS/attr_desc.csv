@@ -1,0 +1,7 @@
+Attribute|Class|Title|Formula|Explanation|Reference
+Cerca|distance|Cerca|x|El objeto está cerca del Sol, es decir, dentro del cinturón de asteroides.|y
+Lejos|distance|Lejos|x|El objeto está lejos del Sol, es decir, fuera del cinturón de asteroides.|y
+Satelites|satellites|Sí tiene satélites|x|El objeto tiene satélites.|y
+Chico|size|Chico|x|El objeto es de tamaño pequeño.|y
+Grande|size|Grande|x|El objeto es de tamaño grande.|y
+Mediano|size|Mediano|x|El objeto tiene un tamaño mediano.|y

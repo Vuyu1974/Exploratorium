@@ -110,10 +110,9 @@
               </div>
 [% END %]
 [% IF logos == 1 %]
-            </div>
+              </div>
             <div class="col-lg-3 logos">
-              <img src="[% page.basedir %]images/logo_uam.jpg" alt="UAM">
-              <img src="[% page.basedir %]images/REMO.png" alt="REMO">
+              <img src="[% page.basedir %]images/logosTODOS.png" alt="LogosTODOS"> 
             </div>
 [% END %]
           </div>

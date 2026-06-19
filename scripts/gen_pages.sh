@@ -6,7 +6,7 @@ DBDSN=${1:-$DEFAULT_DBDSN}
 
 require_sqlite "$DBDSN"
 
-"$SCRIPTDIR"/gen_gravitytree.sh
+#"$SCRIPTDIR"/gen_gravitytree.sh
 
 ttdir="$PROJECTDIR/tt"
 gen_pages=$(realpath -s --relative-to="$ttdir" "$SCRIPTDIR"/gen_pages.pl)

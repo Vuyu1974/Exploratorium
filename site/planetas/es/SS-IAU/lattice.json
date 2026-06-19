@@ -1,0 +1,664 @@
+{
+   "concepts" : [
+      {
+         "extent" : [
+            "Ceres",
+            "Jup",
+            "Kepler",
+            "Mars",
+            "Mer",
+            "Nep",
+            "Planet",
+            "Pluto",
+            "Sat",
+            "Sun",
+            "Earth",
+            "Uran",
+            "Ven"
+         ],
+         "intent" : [],
+         "md5" : "41a1645bdb91ce7261ee96374eb2d538"
+      },
+      {
+         "extent" : [],
+         "intent" : [
+            "Alrededor de una estrella",
+            "Alrededor del Sol",
+            "Esferico",
+            "Fusion",
+            "Limpia",
+            "Satelites"
+         ],
+         "md5" : "3c662a6d02ea30c65050f4b78552cd1e"
+      },
+      {
+         "extent" : [
+            "Jup",
+            "Kepler",
+            "Mars",
+            "Mer",
+            "Nep",
+            "Planet",
+            "Sat",
+            "Sun",
+            "Earth",
+            "Uran",
+            "Ven"
+         ],
+         "intent" : [
+            "Esferico",
+            "Limpia"
+         ],
+         "md5" : "f62d9945b6aa089e49ae8fe123bca5db"
+      },
+      {
+         "extent" : [
+            "Jup",
+            "Mars",
+            "Mer",
+            "Nep",
+            "Planet",
+            "Sat",
+            "Sun",
+            "Earth",
+            "Uran",
+            "Ven"
+         ],
+         "intent" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia"
+         ],
+         "md5" : "4eb3e61703844b3361c710bd99d410f6"
+      },
+      {
+         "extent" : [
+            "Jup",
+            "Mars",
+            "Nep",
+            "Sat",
+            "Sun",
+            "Earth",
+            "Uran"
+         ],
+         "intent" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia",
+            "Satelites"
+         ],
+         "md5" : "bd69de27b4efe86fa6b948c692ac98cf"
+      },
+      {
+         "extent" : [
+            "Sun"
+         ],
+         "intent" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Fusion",
+            "Limpia",
+            "Satelites"
+         ],
+         "md5" : "ade218cf5cff40ad41474f095bab264a"
+      },
+      {
+         "extent" : [
+            "Kepler"
+         ],
+         "intent" : [
+            "Alrededor de una estrella",
+            "Esferico",
+            "Limpia"
+         ],
+         "md5" : "c73e69feb55bebb10368cfd07f27e959"
+      },
+      {
+         "extent" : [
+            "Ceres",
+            "Jup",
+            "Mars",
+            "Mer",
+            "Nep",
+            "Planet",
+            "Pluto",
+            "Sat",
+            "Sun",
+            "Earth",
+            "Uran",
+            "Ven"
+         ],
+         "intent" : [
+            "Alrededor del Sol"
+         ],
+         "md5" : "fa7fcc6aa3557b31bdfea3eac797e4cb"
+      },
+      {
+         "extent" : [
+            "Jup",
+            "Mars",
+            "Nep",
+            "Pluto",
+            "Sat",
+            "Sun",
+            "Earth",
+            "Uran"
+         ],
+         "intent" : [
+            "Alrededor del Sol",
+            "Satelites"
+         ],
+         "md5" : "609c8718c43d638f8d404bea3d0c2610"
+      }
+   ],
+   "context" : {
+      "Ceres" : {
+         "attributes" : [
+            "Alrededor del Sol"
+         ],
+         "desc" : null,
+         "id" : "Ceres",
+         "name" : "Ceres",
+         "reference" : null,
+         "year" : null
+      },
+      "Earth" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia",
+            "Satelites"
+         ],
+         "desc" : null,
+         "id" : "Earth",
+         "name" : "Tierra",
+         "reference" : null,
+         "year" : null
+      },
+      "Jup" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia",
+            "Satelites"
+         ],
+         "desc" : null,
+         "id" : "Jup",
+         "name" : "Júpiter",
+         "reference" : null,
+         "year" : null
+      },
+      "Kepler" : {
+         "attributes" : [
+            "Alrededor de una estrella",
+            "Esferico",
+            "Limpia"
+         ],
+         "desc" : null,
+         "id" : "Kepler",
+         "name" : "Kepler-186f",
+         "reference" : null,
+         "year" : null
+      },
+      "Mars" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia",
+            "Satelites"
+         ],
+         "desc" : null,
+         "id" : "Mars",
+         "name" : "Marte",
+         "reference" : null,
+         "year" : null
+      },
+      "Mer" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia"
+         ],
+         "desc" : null,
+         "id" : "Mer",
+         "name" : "Mercurio",
+         "reference" : null,
+         "year" : null
+      },
+      "Nep" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia",
+            "Satelites"
+         ],
+         "desc" : null,
+         "id" : "Nep",
+         "name" : "Neptuno",
+         "reference" : null,
+         "year" : null
+      },
+      "Planet" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia"
+         ],
+         "desc" : null,
+         "id" : "Planet",
+         "name" : "Planeta",
+         "reference" : null,
+         "year" : null
+      },
+      "Pluto" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Satelites"
+         ],
+         "desc" : null,
+         "id" : "Pluto",
+         "name" : "Pluton",
+         "reference" : null,
+         "year" : null
+      },
+      "Sat" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia",
+            "Satelites"
+         ],
+         "desc" : null,
+         "id" : "Sat",
+         "name" : "Saturno",
+         "reference" : null,
+         "year" : null
+      },
+      "Sun" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Fusion",
+            "Limpia",
+            "Satelites"
+         ],
+         "desc" : null,
+         "id" : "Sun",
+         "name" : "Sol",
+         "reference" : null,
+         "year" : null
+      },
+      "Uran" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia",
+            "Satelites"
+         ],
+         "desc" : null,
+         "id" : "Uran",
+         "name" : "Urano",
+         "reference" : null,
+         "year" : null
+      },
+      "Ven" : {
+         "attributes" : [
+            "Alrededor del Sol",
+            "Esferico",
+            "Limpia"
+         ],
+         "desc" : null,
+         "id" : "Ven",
+         "name" : "Venus",
+         "reference" : null,
+         "year" : null
+      }
+   },
+   "links" : [
+      {
+         "source" : 0,
+         "target" : 2
+      },
+      {
+         "source" : 0,
+         "target" : 7
+      },
+      {
+         "source" : 2,
+         "target" : 3
+      },
+      {
+         "source" : 2,
+         "target" : 6
+      },
+      {
+         "source" : 3,
+         "target" : 4
+      },
+      {
+         "source" : 4,
+         "target" : 5
+      },
+      {
+         "source" : 5,
+         "target" : 1
+      },
+      {
+         "source" : 6,
+         "target" : 1
+      },
+      {
+         "source" : 7,
+         "target" : 8
+      },
+      {
+         "source" : 7,
+         "target" : 3
+      },
+      {
+         "source" : 8,
+         "target" : 4
+      }
+   ],
+   "nodes" : [
+      {
+         "children" : [
+            "184239573",
+            "397881829"
+         ],
+         "concept" : {
+            "extent" : [
+               "Ceres",
+               "Jup",
+               "Kepler",
+               "Mars",
+               "Mer",
+               "Nep",
+               "Planet",
+               "Pluto",
+               "Sat",
+               "Sun",
+               "Earth",
+               "Uran",
+               "Ven"
+            ],
+            "intent" : [],
+            "md5" : "41a1645bdb91ce7261ee96374eb2d538"
+         },
+         "hash" : "1820836128",
+         "idx" : 0,
+         "labelAttributes" : [],
+         "labelObjects" : [],
+         "level" : "5",
+         "parents" : []
+      },
+      {
+         "children" : [],
+         "concept" : {
+            "extent" : [],
+            "intent" : [
+               "Alrededor de una estrella",
+               "Alrededor del Sol",
+               "Esferico",
+               "Fusion",
+               "Limpia",
+               "Satelites"
+            ],
+            "md5" : "3c662a6d02ea30c65050f4b78552cd1e"
+         },
+         "hash" : "741693601",
+         "idx" : 1,
+         "labelAttributes" : [],
+         "labelObjects" : [],
+         "level" : "0",
+         "parents" : [
+            "855848536",
+            "898725418"
+         ]
+      },
+      {
+         "children" : [
+            "85757049",
+            "898725418"
+         ],
+         "concept" : {
+            "extent" : [
+               "Jup",
+               "Kepler",
+               "Mars",
+               "Mer",
+               "Nep",
+               "Planet",
+               "Sat",
+               "Sun",
+               "Earth",
+               "Uran",
+               "Ven"
+            ],
+            "intent" : [
+               "Esferico",
+               "Limpia"
+            ],
+            "md5" : "f62d9945b6aa089e49ae8fe123bca5db"
+         },
+         "hash" : "184239573",
+         "idx" : 2,
+         "labelAttributes" : [
+            "Limpia",
+            "Esferico"
+         ],
+         "labelObjects" : [],
+         "level" : "4",
+         "parents" : [
+            "1820836128"
+         ]
+      },
+      {
+         "children" : [
+            "1987138458"
+         ],
+         "concept" : {
+            "extent" : [
+               "Jup",
+               "Mars",
+               "Mer",
+               "Nep",
+               "Planet",
+               "Sat",
+               "Sun",
+               "Earth",
+               "Uran",
+               "Ven"
+            ],
+            "intent" : [
+               "Alrededor del Sol",
+               "Esferico",
+               "Limpia"
+            ],
+            "md5" : "4eb3e61703844b3361c710bd99d410f6"
+         },
+         "hash" : "85757049",
+         "idx" : 3,
+         "labelAttributes" : [],
+         "labelObjects" : [
+            "Ven",
+            "Planet",
+            "Mer"
+         ],
+         "level" : "3",
+         "parents" : [
+            "184239573",
+            "397881829"
+         ]
+      },
+      {
+         "children" : [
+            "855848536"
+         ],
+         "concept" : {
+            "extent" : [
+               "Jup",
+               "Mars",
+               "Nep",
+               "Sat",
+               "Sun",
+               "Earth",
+               "Uran"
+            ],
+            "intent" : [
+               "Alrededor del Sol",
+               "Esferico",
+               "Limpia",
+               "Satelites"
+            ],
+            "md5" : "bd69de27b4efe86fa6b948c692ac98cf"
+         },
+         "hash" : "1987138458",
+         "idx" : 4,
+         "labelAttributes" : [],
+         "labelObjects" : [
+            "Uran",
+            "Earth",
+            "Sat",
+            "Nep",
+            "Mars",
+            "Jup"
+         ],
+         "level" : "2",
+         "parents" : [
+            "85757049",
+            "739511849"
+         ]
+      },
+      {
+         "children" : [
+            "741693601"
+         ],
+         "concept" : {
+            "extent" : [
+               "Sun"
+            ],
+            "intent" : [
+               "Alrededor del Sol",
+               "Esferico",
+               "Fusion",
+               "Limpia",
+               "Satelites"
+            ],
+            "md5" : "ade218cf5cff40ad41474f095bab264a"
+         },
+         "hash" : "855848536",
+         "idx" : 5,
+         "labelAttributes" : [
+            "Fusion"
+         ],
+         "labelObjects" : [
+            "Sun"
+         ],
+         "level" : "1",
+         "parents" : [
+            "1987138458"
+         ]
+      },
+      {
+         "children" : [
+            "741693601"
+         ],
+         "concept" : {
+            "extent" : [
+               "Kepler"
+            ],
+            "intent" : [
+               "Alrededor de una estrella",
+               "Esferico",
+               "Limpia"
+            ],
+            "md5" : "c73e69feb55bebb10368cfd07f27e959"
+         },
+         "hash" : "898725418",
+         "idx" : 6,
+         "labelAttributes" : [
+            "Alrededor de una estrella"
+         ],
+         "labelObjects" : [
+            "Kepler"
+         ],
+         "level" : "1",
+         "parents" : [
+            "184239573"
+         ]
+      },
+      {
+         "children" : [
+            "739511849",
+            "85757049"
+         ],
+         "concept" : {
+            "extent" : [
+               "Ceres",
+               "Jup",
+               "Mars",
+               "Mer",
+               "Nep",
+               "Planet",
+               "Pluto",
+               "Sat",
+               "Sun",
+               "Earth",
+               "Uran",
+               "Ven"
+            ],
+            "intent" : [
+               "Alrededor del Sol"
+            ],
+            "md5" : "fa7fcc6aa3557b31bdfea3eac797e4cb"
+         },
+         "hash" : "397881829",
+         "idx" : 7,
+         "labelAttributes" : [
+            "Alrededor del Sol"
+         ],
+         "labelObjects" : [
+            "Ceres"
+         ],
+         "level" : "4",
+         "parents" : [
+            "1820836128"
+         ]
+      },
+      {
+         "children" : [
+            "1987138458"
+         ],
+         "concept" : {
+            "extent" : [
+               "Jup",
+               "Mars",
+               "Nep",
+               "Pluto",
+               "Sat",
+               "Sun",
+               "Earth",
+               "Uran"
+            ],
+            "intent" : [
+               "Alrededor del Sol",
+               "Satelites"
+            ],
+            "md5" : "609c8718c43d638f8d404bea3d0c2610"
+         },
+         "hash" : "739511849",
+         "idx" : 8,
+         "labelAttributes" : [
+            "Satelites"
+         ],
+         "labelObjects" : [
+            "Pluto"
+         ],
+         "level" : "3",
+         "parents" : [
+            "397881829"
+         ]
+      }
+   ]
+}

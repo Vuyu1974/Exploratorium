@@ -66,7 +66,7 @@ sub importContextAsContext {
   my $numAttributes = scalar @attributes;
 
   my $obj_rh = sqlFetch($dbh, $context_name, $lang,
-                        'SELECT Code AS Id, Object AS Name FROM v_object_context ' .
+                        'SELECT Code AS Id, Object AS Name, Description AS desc, Reference AS reference, ReferenceYear AS year FROM v_object_context ' .
                         'WHERE Context = ? AND Lang = ?');
   my @objects = map { $_->{'Id'} } @$obj_rh;
   my $numObjects = scalar @objects;
@@ -94,7 +94,8 @@ sub importContextAsContext {
     'context' => $context,
     'attributes' => \@attributes,
     'objects' => \@objects,
-    'objectsByName' => \%objectsByName
+    'objectsByName' => \%objectsByName,
+    'obj_rh' => $obj_rh                  #<---línea agregada
   };
 }
 
@@ -232,6 +233,7 @@ my $context = $result->{'context'};
 my $attributes = $result->{'attributes'};
 my $objects = $result->{'objects'};
 my $objectsByName = $result->{'objectsByName'};
+my $obj_rh = $result->{'obj_rh'};   #<------- línea agregada
 
 debugContext($context, $objects) if $DEBUG;
 
@@ -261,10 +263,17 @@ for (my $i = 0; $i < $context->getObjectCount(); $i++) {
       push @attributesList, $attributes->[$j];
     }
   }
+
+  #Recuperamos el registro original guardado en $obj_rh usando el índice $i
+  my $db_obj = $obj_rh->[$i];
+
   my $aobject = {
-    'name' => $object->getName(),
+        'name' => $object->getName(),
         'id' => $objects->[$i],
-        'attributes' => \@attributesList
+        'attributes' => \@attributesList,
+        'desc' => $db_obj->{'Description'},
+        'reference' => $db_obj->{'Reference'},
+        'year' => $db_obj->{'ReferenceYear'}
   };
   $acontext{$objects->[$i]} = $aobject;
 }

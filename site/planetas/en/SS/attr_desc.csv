@@ -1,0 +1,7 @@
+Attribute|Class|Title|Formula|Explanation|Reference
+Far|distance|Far|x|The object is far from the Sun, that is, outside the asteroid belt.|y
+Near|distance|Near|x|The object is near the Sun, that is, inside the asteroid belt.|y
+Has satellites|satellites|Has satellites|x|The object has satellites.|y
+Big|size|Big|x|The object is big in size.|y
+Medium|size|Medium|x|The object has a medium size.|y
+Small|size|Small|x|The object is small in size.|y

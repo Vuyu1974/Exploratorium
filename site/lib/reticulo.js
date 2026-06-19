@@ -64,13 +64,15 @@
         .attr("y2", datum => datum.target.y);
     }
 
-    const nodesByHash = {};
-    function nodesByHashInit(nodes) {
+    const nodesByHash = {__initialized__: false };
+
+    // CORRECCIÓN: Indexa los nodos usando la lista que le pasamos dinámicamente
+    function nodesByHashInit(nodesList) {
       if (nodesByHash.__initialized__) {
         return;
       }
       nodesByHash.__initialized__ = true;
-      for (let node of nodes) {
+      for (let node of nodesList) {
         if (node.hash) {
           nodesByHash[node.hash] = node;
         }
@@ -79,10 +81,12 @@
         }
       }
     }
-
+//FUNCIÓN CORREGIDA: Usa el argumento 'nodes' local para inicializar el mapa de forma segura
     function getNodeByHash(nodes, hash, md5) {
-      nodesByHashInit(nodes);
-
+      if (nodes && !nodesByHash.__initialized__){
+        nodesByHashInit(nodes); //Se ejecuta de forma perezosa (lazy)solo cuando nodes ya existe
+      }
+      
       let node = nodesByHash[hash];
       if (node) {
         return node;
@@ -101,19 +105,63 @@
     }
 
     function mergeNodePos(nodes, nodePos) {
+      // 1. Mapeamos todas las posiciones que sí existen en pos.json
       for (let pos of nodePos) {
         let node = getNodeByHash(nodes, pos.hash, pos.concept);
         if (!node) {
-          node = nodes[pos.idx];
-          if (!node) {
+            node = nodes[pos.idx];
+        if (!node) {
             continue;
           }
         }
         node.x = pos.x;
         node.y = pos.y;
+        node.pos_mapped = true; //Marcamos que esste nodo ya tiene posición real
+      }
+    
+  //2. Buscamos si algún nodo de lattice.json se quedó sin coordenadas
+      // Calculamos el nivel máximo para distribuir los nodos verticalmente por nivel jerárquico.
+      const CANVAS_WIDTH = 800;
+      const CANVAS_HEIGHT = 800;
+
+      // Nivel máximo de la red
+      const nmax = nodes.reduce ((max,n)=>Math.max(max, n.level || 0), 0);
+      const step = nmax > 0 ? CANVAS_HEIGHT / nmax : CANVAS_HEIGHT;   
+
+    // Cuántos nodos sin posición hay en cada nivel
+    const countPerLevel = {};
+    for (let node of nodes) {     // ← primer loop
+      if(!node.pos_mapped){
+        const lvl = node.level || 0;
+        countPerLevel[lvl] = (countPerLevel[lvl] || 0) + 1;
       }
     }
+      // Índice acumulador por nivel para repartir en x
+    const indexPerLevel = {};
 
+    for (let node of nodes) {      // ← segundo loop
+      if (!node.pos_mapped) {
+        const lvl   = node.level || 0;
+        indexPerLevel[lvl] = indexPerLevel[lvl] || 0;
+
+        const total = countPerLevel[lvl];
+        const i     = indexPerLevel[lvl];
+
+
+        // Repartimos en N+1 franjas para no pegar los nodos a los bordes
+        node.x  = CANVAS_WIDTH  * (i + 1) / (total + 1);
+        node.fx = node.x;
+        node.y  = CANVAS_HEIGHT - lvl * step;
+        node.fy = node.y;
+
+        indexPerLevel[lvl]++;
+      
+     
+      //Dejamos un aviso limpio en la consola para saber cuáles faltan en los datos metateóricos
+      console.warn(`Nodo sin coordenadas en pos.json (Hash: ${node.hash}, nivel: ${node.level}). Posición inicial por nivel: y=${node.y}`);
+        }
+    }
+  }
     function levelTextSetPos(textEle, config) {
       const lvlY = config.LABELS_ORIGIN_Y +
             config.NODE_RADIUS +
@@ -295,6 +343,7 @@
 
     function infoboxClosedCB() {
       window.info_attr_id = undefined;
+      window.info_obj_id = undefined;
     }
 
     function htmlIfNotEmpty(ele) {
@@ -304,44 +353,95 @@
       return ele.html();
     }
 
-    function attributeClick(event, infobox) {
-      event.stopPropagation();
 
-      const attr = event.target.parentNode.attribute;
-      const infocont = infobox.select(".cont");
+      function objectClick(event, infobox) {
+        event.stopPropagation();
 
-      const attr_id = getAttrId(attr);
+    // Ahora los objetos también guardan su propiedad limpia en el parentNode, igual que los atributos
+       const obj = d3.select(event.currentTarget).property("object");
+       const infocont = infobox.select(".cont");
+       const obj_id = getObjId(obj); // Una función equivalente a getAttrId
 
-      const title = htmlIfNotEmpty(d3.select(`#attr-desc-${attr_id} .attr-desc-title`));
+    // Busca en el HTML oculto generado por el NUEVO obj_desc.csv
+       const title = htmlIfNotEmpty(d3.select(`#obj-desc-${obj_id} .obj-desc-title`));
 
-      if (title === "") {
-        return;
+       if (title === "") return; // Freno idéntico si no hay coincidencia en el catálogo
+
+        if (window.info_obj_id != null && obj_id == window.info_obj_id) {
+         floatboxClose(infobox, () => { window.info_obj_id = undefined; });
+          return;
+        }
+
+       window.info_obj_id = obj_id;
+
+       infocont.html("");
+       infocont.append("h2").html(title);
+       infocont.append("div").classed("formula", true).html(htmlIfNotEmpty(d3.select(`#obj-desc-${obj_id} .obj-desc-year`)));
+       infocont.append("div").classed("exp", true).html(htmlIfNotEmpty(d3.select(`#obj-desc-${obj_id} .obj-desc-exp`)));
+       infocont.append("div").classed("ref", true).html(htmlIfNotEmpty(d3.select(`#obj-desc-${obj_id} .obj-desc-ref`)));
+
+    //NUEVO: Forzar el renderizado matemático si la librería está disponible
+        if (window.MathJax && window.MathJax.Hub) {
+         MathJax.Hub.Queue(["Typeset", MathJax.Hub, infocont.node()]);
+        }
+      
+        infobox.style("display", "block");
+      } 
+   
+
+       //Función de click para atributos
+      function attributeClick(event, infobox) {
+        event.stopPropagation();
+
+        const attr = d3.select(event.currentTarget).property("attribute");
+        const infocont = infobox.select(".cont");
+        const attr_id = getAttrId(attr);
+
+        // Seleccionamos el nodo padre del catálogo oculto
+        const baseNode = d3.select(`#attr-desc-${attr_id}`);
+        const title    = htmlIfNotEmpty(baseNode.select(".attr-desc-title"));
+        const formula  = htmlIfNotEmpty(baseNode.select(".attr-desc-formula"));
+        const exp      = htmlIfNotEmpty(baseNode.select(".attr-desc-exp"));
+        const ref      = htmlIfNotEmpty(baseNode.select(".attr-desc-ref"));
+
+        if (title === "" && formula === "" && exp === "") {
+          infocont.html("");
+          infocont.append("h2").text(attr || "Atributo");
+          infobox.style("display", "block");
+          return;
+        }
+
+        if (window.info_attr_id != null &&
+            attr_id == window.info_attr_id) {
+          floatboxClose(infobox, infoboxClosedCB);
+          return;
+        }
+        window.info_attr_id = attr_id;
+
+        infocont.html("");
+       
+       // Inyectamos las secciones de forma estructurada en el infobox
+        infocont.append("h2").html(title || attr);
+
+       if (formula) {
+          infocont.append("div").classed("formula", true).html(formula);
+        }
+        if (exp) {
+          infocont.append("div").classed("exp", true).html(exp);
+        }
+        if (ref) {
+          infocont.append("div").classed("ref", true).html(ref);
+        }
+
+        infobox.style("display", "block");
+
+        // Forzar renderizado de MathJax en el infobox de atributos si existe
+        if (window.MathJax && window.MathJax.Hub) {
+          MathJax.Hub.Queue(["Typeset",MathJax.Hub,infocont.node()]);
+        }
       }
 
-      if (window.info_attr_id != null &&
-          attr_id == window.info_attr_id) {
-        floatboxClose(infobox, infoboxClosedCB);
-        return;
-      }
-      window.info_attr_id = attr_id;
-
-      infocont.html("");
-      infocont.append("h2")
-        .html(title);
-      infocont.append("div")
-        .classed("formula", true)
-        .html(htmlIfNotEmpty(d3.select(`#attr-desc-${attr_id} .attr-desc-formula`)));
-      infocont.append("div")
-        .classed("exp", true)
-        .html(htmlIfNotEmpty(d3.select(`#attr-desc-${attr_id} .attr-desc-exp`)));
-      infocont.append("div")
-        .classed("ref", true)
-        .html(htmlIfNotEmpty(d3.select(`#attr-desc-${attr_id} .attr-desc-ref`)));
-
-      infobox.style("display", "block");
-    }
-
-    function populateNodeDot(dot, radius, hasAttributes, hasLabelObjects) {
+      function populateNodeDot(dot, radius, hasAttributes, hasLabelObjects) {
       dot.node().replaceChildren();
 
       dot
@@ -398,14 +498,15 @@
           .attr("height", bounds.height + (config.TEXTBOX_PADDING * 2));
       }
       catch (e) {
-        window.setTimeout(() => textBoxSetBBox(textBox), 100);
-      }
+        window.setTimeout(() => textBoxSetBBox(textBox, config), 100);
+      } 
     }
-
-    function createTextBox(eleClass, text, anchor) {
+   function createTextBox(eleClass, text, anchor) {
       const group = d3.select(document.createElementNS(d3.namespaces.svg, "g"))
-            .classed(eleClass, true)
-            .on("click", eventStop);
+            .classed(eleClass, true);
+
+      group.on("click", eventStop);
+      
       group.append("rect")
         .classed(eleClass + "-box textbox-box", true);
       group.append("rect")
@@ -440,13 +541,13 @@
       } else {
         const num = Number(scale);
         if (isNaN(num)) {
-          throw (`SCALE must be a number. Value given: {scale}`);
+          throw (`SCALE must be a number. Value given: ${scale}`);
         }
         scale = num;
       }
       config.SCALE = scale;
 
-      affected_configs = ['NODE_RADIUS', 'LABELS_ORIGIN_X', 'LABELS_ORIGIN_Y'];
+    const affected_configs = ['NODE_RADIUS', 'LABELS_ORIGIN_X', 'LABELS_ORIGIN_Y'];
       for (let key of affected_configs) {
         if (! (key in config))
           continue;
@@ -486,9 +587,10 @@
         ATTR_DESC_SOURCE: "attr_desc.csv",
         LATTICE_SOURCE: "lattice.json",
         POS_SOURCE: "pos.json",
-        ATTR_CLASS_DESC_SOURCE: "attr_class_desc.csv"
+        ATTR_CLASS_DESC_SOURCE: "attr_class_desc.csv",
+        OBJ_DESC_SOURCE: "obj_desc.csv" //<--NUEVA LÍNEA
       };
-      for (key in defaults) {
+      for (const key in defaults) {
         if (!config[key]) {
           config[key] = defaults[key];
         }
@@ -864,7 +966,7 @@
 
         const cs = window.getComputedStyle(this);
         const newStyle = document.createElement('div').style;
-        for (prop of cs)
+        for (const prop of cs)
           newStyle.setProperty(prop, cs.getPropertyValue(prop))
         this.__mystyle = newStyle;
       });
@@ -876,7 +978,7 @@
         if (!this.__mystyle)
           return
         const cs = this.__mystyle;
-        for (prop of cs)
+        for (const prop of cs)
           this.style[prop] = cs.getPropertyValue(prop);
       });
 
@@ -1014,56 +1116,59 @@
       return toolbar;
     }
 
-    function toolbarSetup2(toolbar, nodes) {
-      toolbar.select(".tool-selall")
-        .on("click", () => nodes.each(function() { nodeSelect(d3.select(this), true); }));
-      toolbar.select(".tool-selnone")
-        .on("click", () => nodes.each(function() { nodeSelect(d3.select(this), false); }));
-    }
+      function toolbarSetup2(toolbar, nodes) {
+        toolbar.select(".tool-selall")
+          .on("click", () => nodes.each(function() { nodeSelect(d3.select(this), true); }));
+        toolbar.select(".tool-selnone")
+          .on("click", () => nodes.each(function() { nodeSelect(d3.select(this), false); }));
+       }
 
-    function parseViewBox(str) {
-      const vb = str.split(/ *,? +/).map((v) => parseInt(v));
-      return {
-        offsetX: vb[0],
-        offsetY: vb[1],
-        width:   vb[2],
-        height:  vb[3]
-      }
-    }
-
-    function updateExtents(x, y, extents) {
-      const margin = 100;
-      let changed = false;
-
-      if (x < extents[0][0]) {
-        extents[0][0] = x - margin;
-        changed = true;
-      } else if (x > extents[1][0]) {
-        extents[1][0] = x + margin;
-        changed = true;
+      function parseViewBox(str) {
+        const vb = str.split(/ *,? +/).map((v) => parseInt(v));
+        return {
+          offsetX: vb[0],
+          offsetY: vb[1],
+          width:   vb[2],
+          height:  vb[3]
+        }
       }
 
-      if (y < extents[0][1]) {
-        extents[0][1] = y - margin;
-        changed = true;
-      } else if (y > extents[1][1]) {
-        extents[1][1] = y + margin;
-        changed = true;
+      function updateExtents(x, y, extents) {
+        const margin = 100;
+        let changed = false;
+
+        if (x < extents[0][0]) {
+          extents[0][0] = x - margin;
+          changed = true;
+        } 
+        else if (x > extents[1][0]) {
+          extents[1][0] = x + margin;
+          changed = true;
+        }
+
+        if (y < extents[0][1]) {
+          extents[0][1] = y - margin;
+          changed = true;
+        }
+        else if (y > extents[1][1]) {
+          extents[1][1] = y + margin;
+          changed = true;
+        }
+
+        return changed;
       }
 
-      return changed;
-    }
+      const char2ent = {
+          " ": "",
+          "*": "ast",
+          "=": "eq",
+          "≠": "ne"
+      }
 
-    const char2ent = {
-      " ": "",
-      "*": "ast",
-      "=": "eq",
-      "≠": "ne"
-    }
-    function getAttrId(attr) {
-      return attr
-        .replace(/&#[0-9]+;|&#x[0-9a-fA-F]+;|&[0-9a-zA-Z]{2,};|./gu, (m) => {
-          if (m.length >= 4 && m[0] === "&") {
+      function getAttrId(attr) {
+        return attr
+         .replace(/&#[0-9]+;|&#x[0-9a-fA-F]+;|&[0-9a-zA-Z]{2,};|./gu, (m) => {
+           if (m.length >= 4 && m[0] === "&") {
             return m.substr(1, m.length - 2);
           }
           if (m.length === 1) {
@@ -1075,107 +1180,176 @@
             }
           }
           return `${m.codePointAt(0)}-`;
-        })
-        .replace(/[^-a-zA-Z0-9]/g, "")
-        .replace(/-+/g, "-")
-        .replace(/-$/g, "");
-    }
-
-    function eventStop(event) {
+          })
+          .replace(/[^-a-zA-Z0-9]/g, "")
+          .replace(/-+/g, "-")
+          .replace(/-$/g, "");
+      }
+      // NUEVO:
+      function getObjId(obj) {
+        if (obj === undefined || obj === null) {
+        console.warn("Se intentó procesar un objeto indefinido o sin posición asignada.");
+        return "unknown";
+      }
+      // Rereutiliza la lógica compleja pasándole el string del nombre del objeto
+        return getAttrId(obj.toString());
+      }
+      function eventStop(event) {
       event.stopPropagation();
-    }
+      }
 
-    function attributesShow(svg, active) {
+      function attributesShow(svg, active) {
       svg.classed("no-attributes", !active);
-    }
+      }
 
-    function levelsShow(svg, active) {
+      function levelsShow(svg, active) {
       svg.classed("show-levels", !!active);
-    }
+      }
 
-    this.main = function() {
-      configSetup(this.config);
+      this.main = function() {
+        configSetup(this.config);
 
-      const elements = elementsSetup(this.config);
+        const elements = elementsSetup(this.config);
 
-      const d1 = elements.d1;
-      const svg = elements.svg;
-      const root_group = elements.root_group;
-      const infobox = elements.infobox;
+        const d1 = elements.d1;
+        const svg = elements.svg;
+        const root_group = elements.root_group;
+        const infobox = elements.infobox;
 
-      svg.attr("viewBox", this.config.VIEWBOX);
-      root_group.attr("transform", d3.zoomIdentity);
+        svg.attr("viewBox", this.config.VIEWBOX);
+        root_group.attr("transform", d3.zoomIdentity);
 
-      const viewBox = parseViewBox(this.config.VIEWBOX);
-      const translateExtents = [[-viewBox.width / 4, -viewBox.height / 4],
+        const viewBox = parseViewBox(this.config.VIEWBOX);
+        const translateExtents = [[-viewBox.width / 4, -viewBox.height / 4],
                                 [viewBox.width * 1.5, viewBox.height * 1.5]];
 
-      const zoom = d3.zoom()
+        const zoom = d3.zoom()
             .translateExtent(translateExtents)
             .scaleExtent([0.0625, 32])
             .on("zoom", ({transform}) => root_group.attr("transform", transform));
-      svg.call(zoom)
-        .on("dblclick.zoom", null)
-        .on("wheel.zoom", null);
+        svg.call(zoom)
+          .on("dblclick.zoom", null)
+          .on("wheel.zoom", null);
 
-      const legend = d3.select("#legend");
-      const editor = d3.select("#editor");
-      const toolbar = toolbarSetup(d3.select(d1.node().parentNode), svg, zoom, legend, editor, this.config);
+        const legend = d3.select("#legend");
+        const editor = d3.select("#editor");
+        const toolbar = toolbarSetup(d3.select(d1.node().parentNode), svg, zoom, legend, editor, this.config);
 
-      if (this.config.RETICLE_DISABLE) {
-        legendShow(legend, false);
-        if (this.config.USE_EDITOR || this.config.DEV_MODE) {
-          editorSetup(editor, d1, legend, undefined, viewBox, this.config);
+        if (this.config.RETICLE_DISABLE) {
+          legendShow(legend, false);
+          if (this.config.USE_EDITOR || this.config.DEV_MODE) {
+            editorSetup(editor, d1, legend, undefined, viewBox, this.config);
+          }
+          return;
         }
-        return;
-      }
 
-      let nodes = root_group.selectAll(".node");
-      let links = root_group.selectAll(".link");
+        let nodes = root_group.selectAll(".node");
+        let links = root_group.selectAll(".link");
 
-      svg.on("click", (event) => svgClick(event, nodes, links));
+        svg.on("click", (event) => svgClick(event, nodes, links));
 
-      const force = d3.forceSimulation()
+        const force = d3.forceSimulation()
             .force("link", d3.forceLink()
-                   .distance(calcDistance)
-                   .strength(this.config.LINK_STRENGTH))
+            .distance(calcDistance)
+            .strength(this.config.LINK_STRENGTH))
             .force("x", d3.forceX(1).strength(0))
             .force("y", d3.forceY(1).strength(0))
             .velocityDecay(0.5)
             .on("tick", () => forceTick(nodes, links));
 
-      const attrClasses = {};
-      const that = this;
+        const attrClasses = {};
+        const that = this;
+
       function descCsvLoaded(data, attrDesc) {
         const check = new Map();
         for (const desc of data) {
-          const attr_id = getAttrId(desc.Attribute);
+          const attr_id = getAttrId(desc.Attribute || desc.attribute);
           if (check.has(attr_id)) {
             console.warn("Colission between " + check.get(attr_id) + " and " +
-                         desc.Attribute + ". attr_id: " + attr_id);
+                         (desc.Attribute || desc.attribute) + ". attr_id: " + attr_id);
             continue;
           }
-          check.set(attr_id, desc.Attribute);
+          check.set(attr_id, desc.Attribute || desc.attribute);
 
-          desc.Explanation = '<p>' + desc.Explanation.replaceAll('<br>', '</p><p>') + '</p>';
+          // CORRECCIÓN DE CLAVES: Forzamos la lectura tanto en mayúscula como en minúscula 
+          // para asegurar que se extraigan correctamente las columnas del CSV
+          const vTitle = desc.Title || desc.title || "";
+          const vFormula = desc.Formula || desc.formula || "";
+          let vExplanation = desc.Explanation || desc.explanation || "";
+          const vReference = desc.Reference || desc.reference || "";
+
+          if (vExplanation !== "") {
+            vExplanation = '<p>' + vExplanation.replaceAll('<br>', '</p><p>') + '</p>';
+          }
+
+          // CORRECCIÓN: Guardamos los textos limpios en atributos de datos (data-*) 
+          // para protegerlos de las alteraciones que MathJax hace en el DOM interno.
+
           attrDesc.append("div")
             .attr("id", "attr-desc-" + attr_id)
-            .html('<span class="attr-desc-title">' + desc.Title + '</span>' +
-                  '<span class="attr-desc-formula">' + desc.Formula + '</span>' +
-                  '<span class="attr-desc-exp">' + desc.Explanation + '</span>' +
-                  '<span class="attr-desc-ref">' + desc.Reference + '</span>');
-          attrClasses[desc.Attribute] = desc.Class;
+            .attr("data-title",   desc.Title   || desc.title   || "")
+            .attr("data-formula", desc.Formula || desc.formula  || "")
+            .attr("data-exp",     vExplanation)
+            .attr("data-ref",     desc.Reference || desc.reference   || "")
+          
+            .html('<div class="attr-desc-title">' + vTitle + '</div>' +
+                  '<div class="attr-desc-formula">' + vFormula + '</div>' +
+                  '<div class="attr-desc-exp">' + vExplanation + '</div>' +
+                  '<div class="attr-desc-ref">' + vReference + '</div>');
+         
+         attrClasses[desc.Attribute || desc.attribute] = desc.Class || desc.class;
         }
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, attrDesc.node()]);
-        d3.json(that.config.POS_SOURCE).then((nodePos) =>
-          d3.json(that.config.LATTICE_SOURCE).then((graph) => latticeJsonLoaded(graph, nodePos)));
+
+        // CORRECCIÓN: Primero cargamos los objetos para asegurar el catálogo
+        
+        d3.dsv("|", that.config.OBJ_DESC_SOURCE).then((objData) => {
+          objCsvLoaded(objData, d3.select("#obj-desc"));
+
+        // Una vez que los atributos y objetos están listos en el DOM, cargamos las posiciones y el layout del retículo
+          d3.json(that.config.POS_SOURCE).then((nodePos) =>
+            d3.json(that.config.LATTICE_SOURCE).then((graph) => latticeJsonLoaded(graph, nodePos))
+          );
+        });
       }
+
 
       d3.dsv("|", this.config.ATTR_CLASS_DESC_SOURCE)
         .then((data) => legendSetup(legend, toolbar, data));
 
       d3.dsv("|", this.config.ATTR_DESC_SOURCE)
         .then((data) => descCsvLoaded(data, d3.select("#attr-desc")));
+
+      //NUEVO: Función de procesamiento de objetos (Fuera de las llamadas de carga)
+      function objCsvLoaded(data, target) {
+          // Limpiamos el contenedor por si acaso
+          target.selectAll("*").remove();
+
+          // Creamos un div oculto para cada objeto en el catálogo
+          const divs = target.selectAll("div")
+            .data(data)
+            .enter()
+            .append("div")
+          // Se usa el Code (que viene de object_code) para armar el ID único selector
+            .attr("id", (d) => "obj-desc-" + getObjId(d.Code));
+
+          divs.append("div")
+            .attr("class", "obj-desc-title")
+            .text((d) => d.Label); // Corresponde al label del idioma seleccionado
+
+          divs.append("div")
+            .attr("class", "obj-desc-year")
+            .text((d) => d.Year);
+
+          divs.append("div")
+            .attr("class", "obj-desc-exp")
+            .html((d) => d.Description); // Mapeado desde object_desc_$lang
+
+          divs.append("div")
+            .attr("class", "obj-desc-ref")
+            .text((d) => d.Reference);
+      }
+
 
       function latticeJsonLoaded(graph, nodePos) {
         graph.classes = attrClasses;
@@ -1207,6 +1381,8 @@
             (mutations) => {
               for (let i = 0; i < textBoxes.length; i++) {
                 const tb = textBoxes[i];
+                if(!tb){continue;
+              }
                 if (document.contains(tb.node())) {
                   textBoxSetBBox(tb, that.config);
                   textBoxes.splice(i, 1);
@@ -1282,8 +1458,24 @@
             const textBoxes = [];
             for (let i = 0; i < datum.labelObjects.length; i++) {
               const id = datum.labelObjects[i];
-              const textBox = group.append(() => createTextBox("objects-label",
-                                                               graph.context[id].name));
+
+              const objName = graph.context[id].name;
+              const objId = graph.context[id].id;
+             
+              const expNode = d3.select(
+                "#obj-desc-" + getObjId(objId) + " .obj-desc-exp");
+
+              const textBox = group
+                .append(() => createTextBox("objects-label", objName, "start"))
+                .on("click", (event)=> objectClick(event, infobox))
+                .property("object", objId);
+            
+              if(!expNode.empty()){
+                textBox.classed("hasexp",true);
+              }
+
+            // Almacenamos el nombre del objeto en la propiedad del nodo DOM
+          
               textBoxes.push(textBox);
             }
             nodeObjectLabelsSetPos(group, that.config);
@@ -1291,10 +1483,10 @@
           }
 
           return group.node();
-        }
-      }
-    }
-  }
-
+        }// cierra createNode
+      }// cierra latticeJsonLoaded
+    }  // closes this.main  
+  }// cierra retículo     
   window.Reticulo = new reticulo();
+
 } ());

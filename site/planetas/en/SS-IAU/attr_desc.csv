@@ -1,0 +1,7 @@
+Attribute|Class|Title|Formula|Explanation|Reference
+Fusion|fusion|Fusion|x|The object is massive enough to produce themonuclear fusion.|y
+Around a star|orbit|Around a star|x|The object orbits around another star|y
+Around the sun|orbit|Around the Sun|x|The object orbits around the sun.|y
+Clean|orbit|Clean orbit|x|The object has cleaned its orbit from solid objects thought to exist in protoplanetary disks and debris disks, called planetisimals.|y
+Has satellites|satellites|Has satellites|x|The object has satellites.|y
+Spherical|spherical|Spherical|x|The object is massive enough to be rounded by its own gravity.|y

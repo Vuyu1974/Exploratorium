@@ -80,8 +80,8 @@ function contexts2cat {
 function esc {
     local s=$1
     s=${s//\\/\\\\}
-    s=${s//\'/\\\'}
-    printf "'%s'" "${s//\"/\\\"}"
+   s=${s//\'/\'\'}    # THIS IS THE KEY: Replaces ' with '' (double single quote)
+    printf "'%s'" "$s"
 }
 
 function str_or_NULL {
@@ -185,8 +185,8 @@ function render_object {
     local table=$2
 
     eval "$reader" || return 1
-    printf "INSERT INTO %s VALUES(%d,%s);\n" \
-	   "$table" "$object_id" "$(esc "$object_code")"
+    printf "INSERT INTO %s VALUES(%d,%s, %s, %s);\n" \
+	   "$table" "$object_id" "$(esc "$object_code")" "$(str_or_NULL "$reference")" "$(str_or_NULL "$year")"
 }
 
 function render_object_attribute {
@@ -210,12 +210,16 @@ function render_object_context {
 function render_object_desc {
     local reader=$1
     local table=$2
-
+    
     eval "$reader" || return 1
-    printf "INSERT INTO %s VALUES(%d,'en',%s);\n" \
-	   "$table" "$object_id" "$(esc "$object_label_en")"
-    printf "INSERT INTO %s VALUES(%d,'es',%s);\n" \
-	   "$table" "$object_id" "$(esc "$object_label_es")"
+
+    # 2. English description entry
+    printf "INSERT INTO object_desc (object_id, lang_code, label, title, desc) VALUES (%d, 'en', %s, %s, %s);\n" \
+        "$object_id" "$(esc "$object_label_en")" "$(str_or_NULL "$object_title_en")" "$(str_or_NULL "$object_desc_en")"
+
+    # 3. Spanish description entry
+    printf "INSERT INTO object_desc (object_id, lang_code, label, title, desc) VALUES (%d, 'es', %s, %s, %s);\n" \
+        "$object_id" "$(esc "$object_label_es")" "$(str_or_NULL "$object_title_es")" "$(str_or_NULL "$object_desc_es")"
 }
 
 (

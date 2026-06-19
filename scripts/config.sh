@@ -1,1 +1,1 @@
-DIAGRAMSUBDIR=theories
+DIAGRAMSUBDIR=planetas

@@ -35,14 +35,14 @@
   }
 
   .logos img {
-    max-width: 100px;
-    max-height: 100px;
+    max-width: 250px;
+    max-height: auto;
     padding: 15px 0;
     vertical-align: baseline;
   }
 
   .logos img:first-child {
-    max-width: 115px;
+    max-width: 150px;
     padding-right: 15px;
   }
 
