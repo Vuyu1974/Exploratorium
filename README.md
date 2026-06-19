@@ -1,6 +1,6 @@
 # Exploratorium
 
-Web site generator for the [Space-Time Theories
+Web site generator for the [Concept-Lattice
 Exploratorium](https://remo.cua.uam.mx/vis/Exploratorium/), a static
 file web site. Contents is managed and provided by a [simple
 database](#database-design) and a template system based on [Markdown
